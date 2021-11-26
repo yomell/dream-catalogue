@@ -7,6 +7,12 @@ from PyQt5.QtWidgets import QApplication, QHeaderView, QDialog
 
 from help import Ui_HelpWindow
 
+if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+
 db = QSqlDatabase.addDatabase('QSQLITE')
 db.setDatabaseName('bookbase.sqlite')
 db.open()
@@ -160,8 +166,10 @@ class Ui_AddBook(object):
         con = sqlite3.connect("bookbase.sqlite")
         cur = con.cursor()
 
-        entered = [self.enter_writer.text().lower().capitalize(), self.enter_title.text().lower().capitalize(),
-                   self.enter_publisher.text().lower().capitalize(), self.enter_lang.text().lower().capitalize(),
+        entered = [" ".join([i.lower().capitalize() for i in self.enter_writer.text().split()]),
+                   self.enter_title.text().lower().capitalize(),
+                   self.enter_publisher.text().lower().capitalize(),
+                   self.enter_lang.text().lower().capitalize(),
                    self.enter_genre.text().lower().capitalize()]
 
         if '' in entered:
@@ -173,25 +181,34 @@ class Ui_AddBook(object):
             err.exec_()
 
         else:
-            if entered[0] not in cur.execute(f"SELECT name FROM writer").fetchall():
+            if entered[0] not in [k for i in cur.execute(f"SELECT name FROM writer").fetchall() for k in i]:
                 # Проверка на наличие имени писателя в таблице писателей
                 # Индекс беру чтобы не загромождать код тем, что есть в списке entered
 
                 cur.execute(f"INSERT INTO writer(name) VALUES(?)", (entered[0],))
                 # Если писателя нет, то мы его добавляем
 
-            if entered[4] not in cur.execute("SELECT title FROM genre"):
+            if entered[4] not in [k for i in cur.execute("SELECT title FROM genre") for k in i]:
                 cur.execute(f"""INSERT INTO genre(title) VALUES('{entered[4]}')""")
             # Проверка на существование указанного жанра. Если его нет - мы добавляем его в таблицу
             # с жанрами
+            # Я не сделал такую штуку, чтобы жанры разбивались на разные и добавлялись отдельно,
+            # когда человек вводит их через пробел/запятую и т. д., не вижу в этом особой необходимости
+            # (единственный случай, когда это имеет место - это когда человек вводит условно "роман фэнтези"
+            # и "роман, фэнтези", потому что для этих жанров будет создана новая строчка в таблице жанров.
+            # Впрочем, не так страшно
 
             vals = [list(i) for i in
                     cur.execute(f"""SELECT Автор, Название, Издатель, Язык, Жанр FROM book""").fetchall()]
 
-            for i in range(len(vals)):
-                for k in range(len(vals[i])):
-                    if isinstance(vals[i][k], str):
-                        vals[i][k] = vals[i][k].lower().capitalize()
+            # for i in range(len(vals)):
+            #     for k in range(len(vals[i])):
+            #         if isinstance(vals[i][k], str):
+            #             if i != 0:
+            #                 vals[i][k] = vals[i][k].lower().capitalize()
+            #             else:
+            #                 vals[i][k] = " ".join([i.lower().capitalize() for i in self.enter_writer.text().split()])
+            # Вроде этот код не несет смысла, но я оставлю на крайняк
 
             if entered not in vals:
 
@@ -201,7 +218,7 @@ class Ui_AddBook(object):
                 # сделано для избежания цикла, в котором не будет выделяться строка таблицы без жанра.
                 # Ничего страшного в полной проверке дубликатов
 
-                cur.execute(f"""INSERT INTO book(Автор, Название, Издатель, Язык, "Жанр")
+                cur.execute(f"""INSERT INTO book(Автор, Название, Издатель, Язык, Жанр)
                          VALUES('{entered[0]}', '{entered[1]}',
                           '{entered[2]}', '{entered[3]}',
                           '{entered[4]}')""")
@@ -300,12 +317,12 @@ class Ui_RemoveBook(object):
             if len(cur.execute(f"""SELECT * FROM book 
             WHERE Жанр=(SELECT Жанр FROM book WHERE     
             [ID книги] = '{self.rm_enter_title.text()}')""").fetchall()) == 1:
-                cur.execute(f"""DELETE from genre WHERE title=(SELECT Жанр FROM book WHERE
+                cur.execute(f"""DELETE FROM genre WHERE title=(SELECT Жанр FROM book WHERE
                 [ID книги] = '{self.rm_enter_title.text()}')""")
 
             if len(cur.execute(f"""SELECT * FROM writer WHERE name=(SELECT Автор FROM book WHERE
             [ID книги] = '{self.rm_enter_title.text()}')""").fetchall()) == 1:
-                cur.execute(f"""DELETE from writer WHERE name=(SELECT Автор FROM book WHERE
+                cur.execute(f"""DELETE FROM writer WHERE name=(SELECT Автор FROM book WHERE
                 [ID книги] = '{self.rm_enter_title.text()}')""")
 
             cur.execute(f"""DELETE FROM book WHERE [ID книги] = '{self.rm_enter_title.text()}'""")
