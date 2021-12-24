@@ -3,6 +3,7 @@ import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QMovie, QKeySequence
+from PyQt5.QtMultimedia import QSound
 from PyQt5.QtSql import QSqlDatabase, QSqlTableModel
 from PyQt5.QtWidgets import QApplication, QHeaderView, QDialog, QShortcut
 
@@ -63,6 +64,7 @@ class Ui_AddBook(object):
         font = QtGui.QFont()
         font.setFamily("Manrope")
         AddBook.setFont(font)
+
         self.enter_title = QtWidgets.QLineEdit(AddBook)
         self.enter_title.setGeometry(QtCore.QRect(150, 20, 113, 20))
         self.enter_title.setObjectName("enter_title")
@@ -339,6 +341,7 @@ class Ui_RemoveBook(object):
             con.commit()
             catalogue.remove_book_window.close()
 
+
 class Ui_EvaX(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
@@ -361,6 +364,27 @@ class Ui_EvaX(object):
         Form.setWindowTitle(_translate("Form", "OMG ALEX??????"))
 
 
+class Ui_China(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.setFixedSize(640, 496)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
+        self.chinchopa = QMovie('china.gif')
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setMovie(self.chinchopa)
+        self.label.setScaledContents(True)
+        self.label.setGeometry(QtCore.QRect(0, 0, 640, 496))
+        self.label.setObjectName("label")
+
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def retranslateUi(self, Form):
+        _translate = QtCore.QCoreApplication.translate
+        Form.setWindowTitle(_translate("Form", "社会信用测试"))
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -368,6 +392,7 @@ class Ui_MainWindow(object):
         MainWindow.setFixedSize(900, 700)
         MainWindow.setWindowFlag(QtCore.Qt.MSWindowsFixedSizeDialogHint)
         # Флаг, убирающий стрелочку от краев окна (чтоб нельзя было попытаться растянуть приложение)
+        self.amogus = QSound("china.wav")
         font = QtGui.QFont()
         font.setFamily("Manrope")
         MainWindow.setFont(font)
@@ -402,6 +427,37 @@ class Ui_MainWindow(object):
         # Убираем колонки с номерами строк
         self.db_view.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # Убираем возможность редактировать данные в таблице
+
+        self.twn = QtWidgets.QPushButton(self.centralwidget)
+        self.twn.setGeometry(QtCore.QRect(70, 600, 131, 41))
+        font = QtGui.QFont()
+        font.setFamily("Manrope")
+        font.setPointSize(10)
+        font.setBold(True)
+        font.setWeight(75)
+        self.twn.setFont(font)
+        self.twn.setStyleSheet("QPushButton {\n"
+                               "    border: 2px solid #8f8f91;\n"
+                               "    border-radius: 6px;\n"
+                               "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+                               "                                      stop: 0 #f6f7fa, stop: 1 #dadbde);\n"
+                               "    min-width: 80px;\n"
+                               "}\n"
+                               "\n"
+                               "QPushButton:pressed {\n"
+                               "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,\n"
+                               "                                      stop: 0 #dadbde, stop: 1 #f6f7fa);\n"
+                               "}\n"
+                               "\n"
+                               "QPushButton:flat {\n"
+                               "    border: none; /* no border for a flat push button */\n"
+                               "}\n"
+                               "\n"
+                               "QPushButton:default {\n"
+                               "    border-color: navy; /* make the default button prominent */\n"
+                               "}")
+        self.twn.setObjectName("add_book")
+
         self.add_book = QtWidgets.QPushButton(self.centralwidget)
         self.add_book.setGeometry(QtCore.QRect(320, 600, 131, 41))
         font = QtGui.QFont()
@@ -557,6 +613,7 @@ class Ui_MainWindow(object):
         self.Help_action.triggered.connect(MainWindow.help)
         self.add_book.clicked.connect(MainWindow.add_book_func)
         self.remove_book.clicked.connect(MainWindow.remove_book_func)
+        self.twn.clicked.connect(MainWindow.china)
 
         self.Help.addAction(self.Help_action)
         self.menubar.addAction(self.Help.menuAction())
@@ -575,6 +632,7 @@ class Ui_MainWindow(object):
         self.label_filter.setText(_translate("MainWindow", "Сортировка"))
         self.filter_confirm_btn.setText(_translate("MainWindow", "Применить"))
         self.label_order.setText(_translate("MainWindow", "Порядок"))
+        self.twn.setText(_translate("MainWindow", "Тайвань - страна"))
 
     def filter_confirmation(self):
         order = QtCore.Qt.AscendingOrder if self.order_list.currentText() == "По возрастанию" \
@@ -614,7 +672,20 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, Ui_AddBook, Ui_RemoveBook
         yandev_window_ui = Ui_EvaX()
         yandev_window_ui.setupUi(yandev_window)
         yandev_window_ui.yandere.start()
+
+        self.amogus.play()
         yandev_window.exec_()
+        self.amogus.stop()
+
+    def china(self):
+        chn_window = QDialog()
+        chn_window_ui = Ui_China()
+        chn_window_ui.setupUi(chn_window)
+        chn_window_ui.chinchopa.start()
+
+        self.amogus.play()
+        chn_window.exec_()
+        self.amogus.stop()
 
     def add_book_func(self):
         self.add_book_window = QDialog()
