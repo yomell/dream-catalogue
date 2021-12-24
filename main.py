@@ -2,8 +2,9 @@ import sqlite3
 import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QMovie, QKeySequence
 from PyQt5.QtSql import QSqlDatabase, QSqlTableModel
-from PyQt5.QtWidgets import QApplication, QHeaderView, QDialog
+from PyQt5.QtWidgets import QApplication, QHeaderView, QDialog, QShortcut
 
 from help import Ui_HelpWindow
 
@@ -338,6 +339,28 @@ class Ui_RemoveBook(object):
             con.commit()
             catalogue.remove_book_window.close()
 
+class Ui_EvaX(object):
+    def setupUi(self, Form):
+        Form.setObjectName("Form")
+        Form.setFixedSize(640, 496)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("logo.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
+        self.yandere = QMovie('dev.gif')
+        self.label = QtWidgets.QLabel(Form)
+        self.label.setMovie(self.yandere)
+        self.label.setScaledContents(True)
+        self.label.setGeometry(QtCore.QRect(0, 0, 640, 496))
+        self.label.setObjectName("label")
+
+        self.retranslateUi(Form)
+        QtCore.QMetaObject.connectSlotsByName(Form)
+
+    def retranslateUi(self, Form):
+        _translate = QtCore.QCoreApplication.translate
+        Form.setWindowTitle(_translate("Form", "OMG ALEX??????"))
+
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -569,6 +592,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, Ui_AddBook, Ui_RemoveBook
         self.model.setTable('book')
         self.model.select()
 
+        self.shortcum = QShortcut(QKeySequence('Ctrl+C'), self)
+        self.shortcum.activated.connect(self.yandev)
+
         self.db_view.setModel(self.model)
         self.db_view.setFocusPolicy(QtCore.Qt.NoFocus)
         # Убираем пунктир при выделении ячейки
@@ -582,6 +608,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, Ui_AddBook, Ui_RemoveBook
         help_window.exec_()
         # В функции ниже я добавил self для того, чтобы использовать её в другом классе. Кнопка помощи,
         # кроме как для показа аэродинамики коровы, не используется, и других функций в ней нет
+
+    def yandev(self):
+        yandev_window = QDialog()
+        yandev_window_ui = Ui_EvaX()
+        yandev_window_ui.setupUi(yandev_window)
+        yandev_window_ui.yandere.start()
+        yandev_window.exec_()
 
     def add_book_func(self):
         self.add_book_window = QDialog()
