@@ -17,7 +17,7 @@ class Ui_HelpWindow(object):
         self.cow_aer = QtWidgets.QLabel(Help_Window)
         self.cow_aer.setGeometry(QtCore.QRect(50, 20, 604, 391))
         self.cow_aer.setText("")
-        self.cow_aer.setPixmap(QtGui.QPixmap("venv/cow.png"))
+        self.cow_aer.setPixmap(QtGui.QPixmap("cow.png"))
         self.cow_aer.setObjectName("cow_aer")
 
         self.retranslateUi(Help_Window)
